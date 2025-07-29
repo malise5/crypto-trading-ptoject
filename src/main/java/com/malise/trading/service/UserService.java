@@ -9,4 +9,10 @@ public interface UserService {
 
     AuthResponse createUser(CreateUserDTO dto);
 
+    //LOGIN METHOD
+    AuthResponse loginUser(String email, String password);
+
+    AuthResponse verifyOtp(String email, String otp);
+
+
 }
