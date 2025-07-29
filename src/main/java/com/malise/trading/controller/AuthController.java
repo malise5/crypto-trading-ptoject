@@ -1,26 +1,37 @@
 package com.malise.trading.controller;
 
+//import com.malise.trading.ServiceImpl.UserServiceImpl;
 import com.malise.trading.ServiceImpl.UserServiceImpl;
+import com.malise.trading.config.JwtProvider;
 import com.malise.trading.dto.AuthResponse;
 import com.malise.trading.dto.CreateUserDTO;
+import com.malise.trading.model.User;
+import com.malise.trading.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthController {
 
     private final UserServiceImpl userService;
 
     @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(@RequestBody CreateUserDTO userDto) {
-        AuthResponse response = userService.createUser(userDto);
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    public ResponseEntity<AuthResponse> createUser(@RequestBody CreateUserDTO userDto) {
+        // Create user
+        AuthResponse authResponse = userService.createUser(userDto);
+
+        // Return response
+        return ResponseEntity.status(HttpStatus.CREATED).body(authResponse);
+
     }
 }
