@@ -1,7 +1,6 @@
 package com.malise.trading.repository;
 
 import com.malise.trading.dto.CreateUserDTO;
-import com.malise.trading.dto.UserResponseDTO;
 import com.malise.trading.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
