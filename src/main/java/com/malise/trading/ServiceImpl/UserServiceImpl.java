@@ -7,6 +7,7 @@ import com.malise.trading.dto.UserResponseDTO;
 import com.malise.trading.model.TwoFactorOTP;
 import com.malise.trading.model.User;
 import com.malise.trading.repository.UserRepository;
+import com.malise.trading.service.EmailService;
 import com.malise.trading.service.TwoFactorOtpService;
 import com.malise.trading.service.UserService;
 import com.malise.trading.utils.OtpUtil;
@@ -23,6 +24,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final TwoFactorOtpService twoFactorOtpService;
+    private final EmailService emailService;
 
     @Override
     public AuthResponse createUser(CreateUserDTO dto) {
@@ -71,6 +73,12 @@ public class UserServiceImpl implements UserService {
 
             TwoFactorOTP twoFactorOTP = twoFactorOtpService.createTwoFactorOTP(user, otp, null);
 
+            try {
+                emailService.sendVerificationOtpEmail(user.getEmail(), otp);
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to send OTP email", e);
+            }
+
             // ✅ Return early with 2FA prompt
             authResponse.setMessage("Two factor authentication is enabled for this user. Please verify your OTP.");
             authResponse.setTwoFactorEnabled(true);
@@ -85,8 +93,22 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public AuthResponse verifyOtp(String email, String otp) {
-        return null;
+    public AuthResponse verifyOtp(String otp, String id) {
+        TwoFactorOTP twoFactorOTP = twoFactorOtpService.getTwoFactorOTPById(id);
+        if (twoFactorOTP == null) {
+            throw new RuntimeException("Invalid OTP session ID");
+        }
+        if (!twoFactorOTP.getOtp().equals(otp)) {
+            throw new RuntimeException("Invalid OTP");
+        }
+        if (twoFactorOtpService.verifyTwoFactorOTP(twoFactorOTP, otp)) {
+            AuthResponse authResponse = new AuthResponse();
+            authResponse.setMessage("OTP verified successfully");
+            authResponse.setTwoFactorEnabled(true);
+            authResponse.setJwt( twoFactorOTP.getJwtToken());
+            return authResponse;
+        }
+        throw new RuntimeException("OTP verification failed");
     }
 
     private static AuthResponse getAuthResponse(User user) {

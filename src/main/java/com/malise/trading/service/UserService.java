@@ -12,7 +12,7 @@ public interface UserService {
     //LOGIN METHOD
     AuthResponse loginUser(String email, String password);
 
-    AuthResponse verifyOtp(String email, String otp);
+    AuthResponse verifyOtp(String otp, String id);
 
 
 }

@@ -13,10 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
@@ -38,6 +35,15 @@ public class AuthController {
     public ResponseEntity<AuthResponse> loginUser(@RequestBody CreateUserDTO userDto) {
         // Login user
         AuthResponse authResponse = userService.loginUser(userDto.getEmail(), userDto.getPassword());
+        // Return response
+        return ResponseEntity.ok(authResponse);
+    }
+
+    @PostMapping("/verify-otp")
+    public ResponseEntity<AuthResponse> verifyOtp(@PathVariable String otp, @RequestParam String Id) {
+        // Verify OTP
+        AuthResponse authResponse = userService.verifyOtp(otp, Id);
+
         // Return response
         return ResponseEntity.ok(authResponse);
     }
