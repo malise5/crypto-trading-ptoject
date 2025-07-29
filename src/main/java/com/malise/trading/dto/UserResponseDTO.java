@@ -1,5 +1,6 @@
 package com.malise.trading.dto;
 
+import com.malise.trading.domain.USER_ROLE;
 import com.malise.trading.model.TwoFactorAuth;
 import lombok.Data;
 
@@ -8,7 +9,7 @@ public class UserResponseDTO {
     private Long id;
     private String fullname;
     private String email;
-    private String role;
-    private TwoFactorAuth twoFactorAuth = new TwoFactorAuth();
+    private USER_ROLE role;
+    private TwoFactorAuth twoFactorAuth;
 
 }

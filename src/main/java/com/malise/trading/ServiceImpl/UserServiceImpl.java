@@ -31,6 +31,8 @@ public class UserServiceImpl implements UserService {
         responseDTO.setId(savedUser.getId());
         responseDTO.setFullname(savedUser.getFullname());
         responseDTO.setEmail(savedUser.getEmail());
+        responseDTO.setRole(savedUser.getRole());
+        responseDTO.setTwoFactorAuth(savedUser.getTwoFactorAuth());
 
         return responseDTO;
     }
