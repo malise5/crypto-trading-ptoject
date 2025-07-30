@@ -8,6 +8,7 @@ public class CreateUserDTO {
     private Long id;
     private String fullname;
     private String email;
+    private String mobileNumber;
     private String password;
     private USER_ROLE role = USER_ROLE.ROLE_CUSTOMER;
 

@@ -39,7 +39,7 @@ public class AuthController {
         return ResponseEntity.ok(authResponse);
     }
 
-    @PostMapping("/verify-otp")
+    @PostMapping("/two-factor/otp/{otp}")
     public ResponseEntity<AuthResponse> verifyOtp(@PathVariable String otp, @RequestParam String Id) {
         // Verify OTP
         AuthResponse authResponse = userService.verifyOtp(otp, Id);

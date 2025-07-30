@@ -1,9 +1,11 @@
 package com.malise.trading.ServiceImpl;
 
 import com.malise.trading.config.JwtProvider;
+import com.malise.trading.domain.VerificatonType;
 import com.malise.trading.dto.AuthResponse;
 import com.malise.trading.dto.CreateUserDTO;
 import com.malise.trading.dto.UserResponseDTO;
+import com.malise.trading.model.TwoFactorAuth;
 import com.malise.trading.model.TwoFactorOTP;
 import com.malise.trading.model.User;
 import com.malise.trading.repository.UserRepository;
@@ -38,6 +40,7 @@ public class UserServiceImpl implements UserService {
         User user = new User();
         user.setFullname(dto.getFullname());
         user.setEmail(dto.getEmail());
+        user.setMobileNumber(dto.getMobileNumber());
         user.setPassword(dto.getPassword()); // ⚠️ Make sure to hash the password in production
         user.setRole(dto.getRole());
 
@@ -109,6 +112,52 @@ public class UserServiceImpl implements UserService {
             return authResponse;
         }
         throw new RuntimeException("OTP verification failed");
+    }
+
+    @Override
+    public User findUserProfileByJwt(String jwt) {
+        String email = JwtProvider.getEmailFromToken(jwt);
+        if (email == null) {
+            throw new RuntimeException("Invalid JWT token");
+        }
+        User user = userRepository.findByEmail(email);
+        if (user == null) {
+            throw new RuntimeException("User not found");
+        }
+        return user;
+    }
+
+    @Override
+    public User findUserByEmail(String email) {
+        User user = userRepository.findByEmail(email);
+        if (user == null) {
+            throw new RuntimeException("User not found with email: " + email);
+        }
+        return user;
+    }
+
+    @Override
+    public User findUserById(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found with ID: " + id));
+
+    }
+
+    @Override
+    public User enableTwoFactorAuthentication(VerificatonType verificatonType,String sendTo, User user) {
+        TwoFactorAuth twoFactorAuth = user.getTwoFactorAuth();
+        twoFactorAuth.setEnabled(true);
+        twoFactorAuth.setSendTo(verificatonType);
+        user.setTwoFactorAuth(twoFactorAuth);
+        return userRepository.save(user);
+
+    }
+
+    @Override
+    public User updatePassword(User user, String newPassword) {
+        // Update the user's password
+        user.setPassword(newPassword); // ⚠️ Make sure to hash the password in production
+        return userRepository.save(user);
     }
 
     private static AuthResponse getAuthResponse(User user) {
