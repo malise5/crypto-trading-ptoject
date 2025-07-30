@@ -12,5 +12,7 @@ public interface VerificationCodeService {
 
     VerificationCode getVerificationCodeByUserId(Long userId);
 
+//    Boolean verifyOtp(String otp, VerificatonType verificationType);
+
     void deleteVerificationCodeById(VerificationCode verificationCode);
 }

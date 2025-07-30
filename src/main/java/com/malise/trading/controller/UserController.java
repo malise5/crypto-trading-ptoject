@@ -50,7 +50,7 @@ public class UserController {
         }
         if (verificationType.equals(VerificatonType.EMAIL)) {
             emailService.sendVerificationOtpEmail(user.getEmail(), verificationCode.getOtp());
-        } else if (verificationType.equals(VerificatonType.SMS)) {
+        } else if (verificationType.equals(VerificatonType.MOBILE)) {
             // Assuming you have a method to send SMS
             // smsService.sendVerificationSms(user.getMobileNumber(), verificationCode.getOtp());
             log.info("SMS verification code sent to mobile number: {}", user.getMobileNumber());
@@ -62,12 +62,28 @@ public class UserController {
     }
 
     //enable twofactor authentication
-    @PatchMapping("enable-two-factor/verify-otp")
-    public ResponseEntity<User> enableTwoFactorAuthentication(@RequestHeader("Authorization") String jwtToken) {
+    @PatchMapping("enable-two-factor/verify-otp/{otp")
+    public ResponseEntity<User> enableTwoFactorAuthentication(@RequestHeader("Authorization") String jwtToken, @PathVariable String otp ) {
         User user = userService.findUserProfileByJwt(jwtToken);
         if (user == null) {
             return ResponseEntity.status(404).body(null); // User not found
         }
-        return ResponseEntity.ok(user); // Return updated user profile
+
+        VerificationCode verificationCode = verificationCodeService.getVerificationCodeByUserId(user.getId());
+        if (verificationCode == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null); // No verification code found
+        }
+
+        String sendTo = verificationCode.getVerificationType().equals(VerificatonType.EMAIL) ? user.getEmail() : user.getMobileNumber();
+
+        boolean isVerified = verificationCode.getOtp().equals(otp);
+        if (isVerified) {
+            User updatedUser = userService.enableTwoFactorAuthentication(verificationCode.getVerificationType(), sendTo, user);
+
+            verificationCodeService.deleteVerificationCodeById(verificationCode);
+
+            return new ResponseEntity<>(updatedUser, HttpStatus.OK);
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null); // OTP verification failed
     }
 }
